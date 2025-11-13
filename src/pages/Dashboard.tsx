@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Plus, QrCode } from 'lucide-react';
-import { QRLink } from '../lib/supabase';
-import { generateQRCode, getAllQRLinks, updateQRLink, deleteQRLink } from '../lib/qr-service';
-import { CreateQRModal } from '../components/CreateQRModal';
-import { EditQRModal } from '../components/EditQRModal';
-import { QRCodeCard } from '../components/QRCodeCard';
-import { AnalyticsModal } from '../components/AnalyticsModal';
+import { useState, useEffect } from "react";
+import { Plus, QrCode, LogOut } from "lucide-react";
+import { QRLink } from "../lib/supabase";
+import {
+  generateQRCode,
+  getAllQRLinks,
+  updateQRLink,
+  deleteQRLink,
+} from "../lib/qr-service";
+import { CreateQRModal } from "../components/CreateQRModal";
+import { EditQRModal } from "../components/EditQRModal";
+import { QRCodeCard } from "../components/QRCodeCard";
+import { AnalyticsModal } from "../components/AnalyticsModal";
 
-export const Dashboard = () => {
+export const Dashboard = ({ onLogout }: { onLogout: () => void }) => {
   const [qrLinks, setQrLinks] = useState<QRLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -25,7 +30,7 @@ export const Dashboard = () => {
       const data = await getAllQRLinks();
       setQrLinks(data);
     } catch (error) {
-      console.error('Failed to load QR links:', error);
+      console.error("Failed to load QR links:", error);
     } finally {
       setLoading(false);
     }
@@ -60,26 +65,43 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* 🔹 Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <div className="bg-blue-600 p-3 rounded-lg">
               <QrCode className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dynamic QR Manager</h1>
-              <p className="text-gray-600 mt-1">Create and manage your dynamic QR codes</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Dynamic QR Manager
+              </h1>
+              <p className="text-gray-600 mt-1">
+                Create and manage your dynamic QR codes
+              </p>
             </div>
           </div>
 
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            <span className="font-medium">Create QR Code</span>
-          </button>
+          {/* 🔹 Tombol kanan: Create & Logout */}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-medium">Create QR Code</span>
+            </button>
+
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-md hover:shadow-lg"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          </div>
         </div>
 
+        {/* 🔹 Konten utama */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
@@ -92,7 +114,9 @@ export const Dashboard = () => {
             <div className="text-gray-400 mb-4">
               <QrCode className="w-20 h-20 mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No QR Codes Yet</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              No QR Codes Yet
+            </h3>
             <p className="text-gray-600 mb-6">
               Get started by creating your first dynamic QR code
             </p>
@@ -108,7 +132,10 @@ export const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-600">
-                Total QR Codes: <span className="font-semibold text-gray-900">{qrLinks.length}</span>
+                Total QR Codes:{" "}
+                <span className="font-semibold text-gray-900">
+                  {qrLinks.length}
+                </span>
               </p>
             </div>
 
@@ -127,6 +154,7 @@ export const Dashboard = () => {
         )}
       </div>
 
+      {/* 🔹 Modals */}
       <CreateQRModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
