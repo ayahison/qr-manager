@@ -13,20 +13,25 @@ export const generateQRCode = async (url: string, label: string) => {
 
   // Buat kode unik pendek untuk redirect
   const code = nanoid(8);
+  const shortUrl = `${APP_BASE_URL}/q/${code}`;
 
-  // Simpan ke Supabase
+  // Simpan ke Supabase (pastikan kolom short_url ada di tabel)
   const { data, error } = await supabase
     .from("qr_links")
-    .insert([{ label, target_url: formattedUrl, code }])
+    .insert([
+      {
+        label,
+        target_url: formattedUrl,
+        code,
+        short_url: shortUrl,
+      },
+    ])
     .select()
     .single();
 
   if (error) throw error;
 
-  // URL pendek yang akan di-scan pengguna
-  const shortUrl = `${APP_BASE_URL}/q/${code}`;
-
-  // Generate gambar QR dari link pendek, bukan link target langsung
+  // Generate gambar QR dari link pendek
   const qrDataUrl = await QRCode.toDataURL(shortUrl, {
     width: 300,
     margin: 2,
@@ -34,7 +39,6 @@ export const generateQRCode = async (url: string, label: string) => {
 
   return { qrLink: { ...data, qrDataUrl } };
 };
-
 export const getAllQRLinks = async (): Promise<QRLink[]> => {
   const { data, error } = await supabase
     .from("qr_links")
