@@ -5,17 +5,23 @@ import { supabase, QRLink } from "./supabase";
 const APP_BASE_URL = window.location.origin;
 
 export const generateQRCode = async (url: string, label: string) => {
-  // Pastikan URL selalu diawali dengan https://
   const formattedUrl =
     url.startsWith("http://") || url.startsWith("https://")
       ? url
       : `https://${url}`;
 
-  // Buat kode unik pendek untuk redirect
   const code = nanoid(8);
   const shortUrl = `${APP_BASE_URL}/q/${code}`;
 
-  // Simpan ke Supabase (pastikan kolom short_url ada di tabel)
+  // 🔍 TAMBAHKAN INI - Logging untuk debug
+  console.log("=== QR CODE DEBUG ===");
+  console.log("Short URL yang akan di-encode:", shortUrl);
+  console.log("Length:", shortUrl.length);
+  console.log("Type:", typeof shortUrl);
+  console.log("Has whitespace?", /\s/.test(shortUrl));
+  console.log("Raw bytes:", new TextEncoder().encode(shortUrl));
+
+  // Simpan ke database...
   const { data, error } = await supabase
     .from("qr_links")
     .insert([
@@ -31,11 +37,20 @@ export const generateQRCode = async (url: string, label: string) => {
 
   if (error) throw error;
 
-  // Generate gambar QR dari link pendek
+  // Generate QR dengan logging tambahan
   const qrDataUrl = await QRCode.toDataURL(shortUrl, {
     width: 300,
     margin: 2,
+    errorCorrectionLevel: "M",
+    type: "image/png",
+    color: {
+      dark: "#000000",
+      light: "#FFFFFF",
+    },
   });
+
+  console.log("QR Code generated successfully");
+  console.log("===================");
 
   return { qrLink: { ...data, qrDataUrl } };
 };
