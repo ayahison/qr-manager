@@ -1,16 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getQRLinkByCode, incrementScanCount, recordScan } from '../lib/qr-service';
-import { QrCode } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  getQRLinkByCode,
+  incrementScanCount,
+  recordScan,
+} from "../lib/qr-service";
+import { QrCode } from "lucide-react";
 
 export const RedirectPage = () => {
   const { code } = useParams<{ code: string }>();
-  const [status, setStatus] = useState<'loading' | 'redirecting' | 'not-found'>('loading');
+  const [status, setStatus] = useState<"loading" | "redirecting" | "not-found">(
+    "loading"
+  );
 
   useEffect(() => {
     const handleRedirect = async () => {
       if (!code) {
-        setStatus('not-found');
+        setStatus("not-found");
         return;
       }
 
@@ -18,11 +24,11 @@ export const RedirectPage = () => {
         const qrLink = await getQRLinkByCode(code);
 
         if (!qrLink) {
-          setStatus('not-found');
+          setStatus("not-found");
           return;
         }
 
-        setStatus('redirecting');
+        setStatus("redirecting");
 
         await incrementScanCount(qrLink.id);
 
@@ -31,38 +37,41 @@ export const RedirectPage = () => {
 
         await recordScan(qrLink.id, userAgent, undefined, referrer);
 
-        setTimeout(() => {
-          window.location.href = qrLink.target_url;
-        }, 1000);
+        // GANTI BAGIAN INI - redirect langsung tanpa delay
+        window.location.replace(qrLink.target_url);
       } catch (error) {
-        console.error('Redirect error:', error);
-        setStatus('not-found');
+        console.error("Redirect error:", error);
+        setStatus("not-found");
       }
     };
 
     handleRedirect();
   }, [code]);
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Loading...</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            Loading...
+          </h2>
           <p className="text-gray-600">Please wait a moment</p>
         </div>
       </div>
     );
   }
 
-  if (status === 'redirecting') {
+  if (status === "redirecting") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-bounce mb-6">
             <QrCode className="w-16 h-16 text-green-600" />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Redirecting...</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            Redirecting...
+          </h2>
           <p className="text-gray-600">You will be redirected shortly</p>
         </div>
       </div>
@@ -75,9 +84,12 @@ export const RedirectPage = () => {
         <div className="text-red-400 mb-4">
           <QrCode className="w-20 h-20 mx-auto" />
         </div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-3">QR Code Not Found</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-3">
+          QR Code Not Found
+        </h2>
         <p className="text-gray-600 mb-6">
-          This QR code does not exist or has been deleted. Please contact the QR code creator for more information.
+          This QR code does not exist or has been deleted. Please contact the QR
+          code creator for more information.
         </p>
         <a
           href="/"
