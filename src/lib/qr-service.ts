@@ -11,17 +11,26 @@ export const generateQRCode = async (url: string, label: string) => {
       ? url
       : `https://${url}`;
 
+  // Buat kode unik pendek untuk redirect
+  const code = nanoid(8);
+
   // Simpan ke Supabase
   const { data, error } = await supabase
     .from("qr_links")
-    .insert([{ label, target_url: formattedUrl }])
+    .insert([{ label, target_url: formattedUrl, code }])
     .select()
     .single();
 
   if (error) throw error;
 
-  // Generate gambar QR code dari link
-  const qrDataUrl = await QRCode.toDataURL(formattedUrl);
+  // URL pendek yang akan di-scan pengguna
+  const shortUrl = `${APP_BASE_URL}/q/${code}`;
+
+  // Generate gambar QR dari link pendek, bukan link target langsung
+  const qrDataUrl = await QRCode.toDataURL(shortUrl, {
+    width: 300,
+    margin: 2,
+  });
 
   return { qrLink: { ...data, qrDataUrl } };
 };
