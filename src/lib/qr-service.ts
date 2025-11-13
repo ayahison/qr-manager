@@ -11,8 +11,7 @@ export const generateQRCode = async (url: string, label: string) => {
       : `https://${url}`;
 
   const code = nanoid(8);
-  // const shortUrl = `${APP_BASE_URL}/q/${code}`;
-  const shortUrl = `${APP_BASE_URL}/?qr=${code}`;
+  const shortUrl = `${APP_BASE_URL}/q/${code}`;
 
   // 🔍 TAMBAHKAN INI - Logging untuk debug
   console.log("=== QR CODE DEBUG ===");

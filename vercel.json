@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/api/redirect"
+      "source": "/q/:code",
+      "destination": "/api/redirect?code=:code"
     }
   ]
 }
